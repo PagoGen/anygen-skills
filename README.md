@@ -1,70 +1,57 @@
-# AnyGen Content Generator
+# AnyGen Skills
 
 [中文](./README_zh.md)
 
-A Claude Code skill for generating AI content using AnyGen OpenAPI.
+A collection of Claude Code skills for [AnyGen](https://www.anygen.io) - AI-powered content generation platform.
 
-## Features
+## Available Skills
 
-| Operation | Description | File Download |
-|-----------|-------------|---------------|
-| `slide` | Generate PPT/Slides | ✅ Yes (.pptx) |
-| `doc` | Generate Documents | ✅ Yes (.docx) |
-| `chat` | General AI conversation | ❌ Online only |
-| `storybook` | Create storyboards | ❌ Online only |
-| `data_analysis` | Data analysis | ❌ Online only |
-| `website` | Website development | ❌ Online only |
+| Skill | Description | Status |
+|-------|-------------|--------|
+| [task-creator](./task-creator/) | Create and download AnyGen AI tasks (slide, doc, chat, etc.) | ✅ Ready |
 
-## Quick Start
+## Installation
 
-1. **Get API Key** from [AnyGen](https://www.anygen.io) → Setting → Integration
+Copy the desired skill folder to your Claude Code skills directory:
 
-2. **Configure API Key**:
-   ```bash
-   python3 ~/.claude/my_skills/anygen/scripts/anygen.py config set api_key "sk-xxx"
-   ```
+```bash
+# Copy task-creator skill
+cp -r task-creator ~/.claude/my_skills/anygen-task-creator
+```
 
-3. **Generate content**:
-   ```bash
-   # Generate PPT
-   python3 ~/.claude/my_skills/anygen/scripts/anygen.py run \
-     --operation slide \
-     --prompt "A presentation about AI applications" \
-     --output ./output/
+Or clone the entire repository:
 
-   # Generate Document
-   python3 ~/.claude/my_skills/anygen/scripts/anygen.py run \
-     --operation doc \
-     --prompt "A report on 2024 tech trends" \
-     --output ./output/
-   ```
+```bash
+git clone https://github.com/PagoGen/anygen-skills.git ~/.claude/my_skills/anygen-skills
+```
 
-## Commands
+## Prerequisites
 
-| Command | Description |
-|---------|-------------|
-| `create` | Create a generation task |
-| `poll` | Poll task status until completion |
-| `download` | Download generated file |
-| `run` | Full workflow: create → poll → download |
-| `config` | Manage API Key configuration |
+- Python 3
+- requests library: `pip3 install requests`
+- AnyGen API Key ([Get one here](https://www.anygen.io) → Setting → Integration)
 
-## Parameters
+## Repository Structure
 
-| Parameter | Short | Description |
-|-----------|-------|-------------|
-| --api-key | -k | API Key (optional if configured) |
-| --operation | -o | Operation type: slide, doc, chat, etc. |
-| --prompt | -p | Content description |
-| --language | -l | Language: zh-CN or en-US |
-| --slide-count | -c | Number of PPT pages |
-| --style | -s | Style preference |
-| --file | | Attachment file (can be used multiple times) |
-| --output | | Output directory for downloaded files |
+```
+anygen-skills/
+├── README.md              # This file
+├── README_zh.md           # Chinese version
+├── task-creator/          # Task creation skill
+│   ├── README.md
+│   ├── README_zh.md
+│   ├── skill.md
+│   └── scripts/
+│       └── anygen.py
+└── [future-skill]/        # More skills coming soon
+```
 
-## More Details
+## Contributing
 
-See [skill.md](./skill.md) for complete documentation.
+Contributions are welcome! Feel free to:
+- Report issues
+- Submit pull requests
+- Suggest new skills
 
 ## License
 
