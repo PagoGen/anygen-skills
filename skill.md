@@ -1,141 +1,143 @@
 ---
 name: anygen
-description: "生成 AnyGen AI 任务，支持多种模式：chat (通用)、slide (PPT)、doc (文档)、storybook (故事板)、data_analysis (数据分析)、website (网站开发)。提交 prompt 后返回任务链接。"
+description: "Generate AnyGen AI tasks supporting multiple modes: chat (general), slide (PPT), doc (document), storybook, data_analysis, website. Returns task link after submitting prompt."
 ---
 
 # AnyGen Content Generator
 
-使用 AnyGen OpenAPI 创建 AI 生成任务，支持多种内容生成模式。
+Create AI generation tasks using AnyGen OpenAPI, supporting multiple content generation modes.
 
 ## When to use
 
-- 用户需要创建 PPT/Slide (slide)
-- 用户需要生成文档 (doc)
-- 用户需要创建故事板 (storybook)
-- 用户需要数据分析 (data_analysis)
-- 用户需要生成网站 (website)
-- 用户需要通用 AI 对话/生成 (chat)
-- 用户提供内容描述，需要 AI 自动生成各类内容
+- User needs to create PPT/Slides (slide)
+- User needs to generate documents (doc)
+- User needs to create storyboards (storybook)
+- User needs data analysis (data_analysis)
+- User needs to generate websites (website)
+- User needs general AI conversation/generation (chat)
+- User provides content description and needs AI to automatically generate various types of content
 
 ## Prerequisites
 
 - Python3
-- requests 库: `pip3 install requests`
-- AnyGen API Key (格式: `sk-xxx`)
+- requests library: `pip3 install requests`
+- AnyGen API Key (format: `sk-xxx`)
 
-### 获取 API Key
+### Getting API Key
 
-如果没有 API Key，需要在 AnyGen 网站获取：
+If you don't have an API Key, you need to obtain one from the AnyGen website:
 
-1. 访问 [AnyGen](https://www.anygen.io)
-2. 进入 **Setting** (设置)
-3. 切换到 **集成** Tab
-4. 点击生成 API Key
+1. Visit [AnyGen](https://www.anygen.io)
+2. Go to **Setting**
+3. Switch to **Integration** Tab
+4. Click to generate API Key
 
-### 配置 API Key (推荐)
+### Configuring API Key (Recommended)
 
-获取 API Key 后，建议保存到配置文件，避免每次输入：
+After obtaining the API Key, it's recommended to save it to a config file to avoid entering it every time:
 
 ```bash
-# 保存 API Key
+# Save API Key
 python3 ~/.claude/my_skills/anygen/scripts/anygen.py config set api_key "sk-xxx"
 
-# 查看当前配置
+# View current config
 python3 ~/.claude/my_skills/anygen/scripts/anygen.py config get
 
-# 查看配置文件路径
+# View config file path
 python3 ~/.claude/my_skills/anygen/scripts/anygen.py config path
 ```
 
-配置文件位置: `~/.config/anygen/config.json`
+Config file location: `~/.config/anygen/config.json`
 
-**API Key 优先级**: 命令行参数 > 环境变量 `ANYGEN_API_KEY` > 配置文件
+**API Key Priority**: Command line argument > Environment variable `ANYGEN_API_KEY` > Config file
 
 ## Required User Inputs
 
 | Field | Description | Required |
 |-------|-------------|----------|
-| API Key | AnyGen API Key，格式 `sk-xxx` | Yes |
-| Operation | 操作类型 (见下表) | Yes |
-| Prompt | 内容描述/提示词 | Yes |
+| API Key | AnyGen API Key, format `sk-xxx` | Yes |
+| Operation | Operation type (see table below) | Yes |
+| Prompt | Content description/prompt | Yes |
 
-### 支持的操作类型
+### Supported Operation Types
 
-| Operation | 说明 |
-|-----------|------|
-| `chat` | 通用模式 (SuperAgent) |
-| `slide` | Slides 模式 (SuperAgent Slides) |
-| `doc` | Doc 模式 (SuperAgent Doc) |
-| `storybook` | Storybook 模式 |
-| `data_analysis` | 数据分析模式 |
-| `website` | Website 开发模式 |
+| Operation | Description |
+|-----------|-------------|
+| `chat` | General mode (SuperAgent) |
+| `slide` | Slides mode (SuperAgent Slides) |
+| `doc` | Doc mode (SuperAgent Doc) |
+| `storybook` | Storybook mode |
+| `data_analysis` | Data analysis mode |
+| `website` | Website development mode |
+
+**Note**: Only `slide` and `doc` support file download. Other operations (`chat`, `storybook`, `data_analysis`, `website`) only return a task URL for online viewing.
 
 ## Skill Invocation Flow
 
-### Step 1: 收集必要信息
+### Step 1: Collect Required Information
 
-执行前需要向用户确认以下信息：
+Before execution, confirm the following information with the user:
 
 ```
-请提供以下信息：
+Please provide the following information:
 
-【必填】
-1. API Key: 你的 AnyGen API Key (格式: sk-xxx)
-2. 生成类型: slide (PPT) 或 doc (文档)
-3. 内容描述: 描述你想生成的内容
+【Required】
+1. API Key: Your AnyGen API Key (format: sk-xxx)
+2. Generation type: slide (PPT) or doc (document)
+3. Content description: Describe what you want to generate
 
-【推荐提供 - 可显著提升生成效果】
-4. 风格偏好: 你希望的风格是什么？例如：
-   - PPT: 商务正式、简约现代、科技感、学术风格、创意活泼等
-   - 文档: 正式报告、技术文档、营销文案、学术论文等
-5. 参考文件: 是否有参考资料？例如：
-   - 已有的 PPT/文档作为风格参考
-   - 相关的 PDF、图片、文本资料
-   - 公司 Logo 或品牌素材
-   (支持格式: PDF, PNG, JPG, DOCX, PPTX, TXT)
+【Recommended - Can significantly improve generation quality】
+4. Style preference: What style do you prefer? For example:
+   - PPT: Business formal, minimalist modern, tech-style, academic, creative and lively, etc.
+   - Document: Formal report, technical documentation, marketing copy, academic paper, etc.
+5. Reference files: Do you have any reference materials? For example:
+   - Existing PPT/documents as style reference
+   - Related PDFs, images, text materials
+   - Company logo or brand assets
+   (Supported formats: PDF, PNG, JPG, DOCX, PPTX, TXT)
 
-【其他可选参数】
-- 语言: zh-CN (默认) 或 en-US
-- PPT 页数: 默认由 AI 决定
-- PPT 模板: business, education, etc.
-- PPT 比例: 16:9 (默认) 或 4:3
-- 文档格式: docx (默认) 或 pdf
+【Other optional parameters】
+- Language: zh-CN (default) or en-US
+- PPT page count: Default determined by AI
+- PPT template: business, education, etc.
+- PPT ratio: 16:9 (default) or 4:3
+- Document format: docx (default) or pdf
 ```
 
-> **提示**: 风格描述和参考文件不是必须的，但提供这些信息可以让 AnyGen 生成更符合你期望的内容。
+> **Tip**: Style description and reference files are not mandatory, but providing this information can help AnyGen generate content that better matches your expectations.
 
-### Step 2: 创建任务
+### Step 2: Create Task
 
 ```bash
 python3 ~/.claude/my_skills/anygen/scripts/anygen.py create \
   --api-key "sk-xxx" \
   --operation slide \
-  --prompt "关于人工智能发展历史的演示文稿" \
+  --prompt "A presentation about the history of artificial intelligence" \
   --language zh-CN \
   --slide-count 10 \
   --ratio "16:9" \
-  --style "科技感、简约现代" \
+  --style "tech-style, minimalist modern" \
   --file ./reference.pdf
 ```
 
-#### 创建任务参数
+#### Create Task Parameters
 
-| 参数 | 简写 | 说明 | 必填 |
-|------|------|------|------|
+| Parameter | Short | Description | Required |
+|-----------|-------|-------------|----------|
 | --api-key | -k | API Key | Yes |
-| --operation | -o | slide 或 doc | Yes |
-| --prompt | -p | 内容描述 | Yes |
-| --language | -l | 语言 (zh-CN/en-US) | No |
-| --slide-count | -c | PPT 页数 | No |
-| --template | -t | PPT 模板 | No |
-| --ratio | -r | PPT 比例 (16:9/4:3) | No |
-| --doc-format | -f | 文档格式 (docx/pdf) | No |
-| --file | | 附件文件路径 (可多次使用) | No |
-| --style | -s | 风格偏好 (如 '商务正式', '简约现代') | No |
+| --operation | -o | slide or doc | Yes |
+| --prompt | -p | Content description | Yes |
+| --language | -l | Language (zh-CN/en-US) | No |
+| --slide-count | -c | Number of PPT pages | No |
+| --template | -t | PPT template | No |
+| --ratio | -r | PPT ratio (16:9/4:3) | No |
+| --doc-format | -f | Document format (docx/pdf) | No |
+| --file | | Attachment file path (can be used multiple times) | No |
+| --style | -s | Style preference (e.g., 'business formal', 'minimalist modern') | No |
 
-### Step 3: 轮询任务状态
+### Step 3: Poll Task Status
 
-创建成功后会返回 task_id，使用以下命令轮询：
+After successful creation, a task_id will be returned. Use the following command to poll:
 
 ```bash
 python3 ~/.claude/my_skills/anygen/scripts/anygen.py poll \
@@ -143,11 +145,11 @@ python3 ~/.claude/my_skills/anygen/scripts/anygen.py poll \
   --task-id "task_abc123xyz"
 ```
 
-脚本会自动轮询直到任务完成或失败，每 3 秒查询一次。
+The script will automatically poll until the task completes or fails, querying every 3 seconds.
 
-### Step 4: 下载文件（可选）
+### Step 4: Download File (Optional)
 
-任务完成后可以下载文件：
+After the task completes, you can download the file:
 
 ```bash
 python3 ~/.claude/my_skills/anygen/scripts/anygen.py download \
@@ -156,82 +158,82 @@ python3 ~/.claude/my_skills/anygen/scripts/anygen.py download \
   --output ./output/
 ```
 
-## 一键执行（创建 + 轮询 + 下载）
+## One-Click Execution (Create + Poll + Download)
 
 ```bash
-# 如果已配置 API Key，可省略 --api-key 参数
+# If API Key is already configured, --api-key parameter can be omitted
 python3 ~/.claude/my_skills/anygen/scripts/anygen.py run \
   --operation slide \
-  --prompt "关于人工智能发展历史的演示文稿" \
-  --style "商务正式" \
+  --prompt "A presentation about the history of artificial intelligence" \
+  --style "business formal" \
   --file ./company_logo.png \
   --output ./output/
 ```
 
-`run` 命令会自动：
-1. 创建任务
-2. 轮询等待完成
-3. 下载生成的文件
+The `run` command will automatically:
+1. Create the task
+2. Poll and wait for completion
+3. Download the generated file
 
 ## Output Examples
 
-### 创建任务成功
+### Task Created Successfully
 
 ```
-[INFO] 创建任务中...
-[SUCCESS] 任务创建成功!
+[INFO] Creating task...
+[SUCCESS] Task created successfully!
 Task ID: task_abc123xyz
 ```
 
-### 轮询进度
+### Polling Progress
 
 ```
-[INFO] 查询任务状态: task_abc123xyz
-[PROGRESS] 状态: processing, 进度: 30%
-[PROGRESS] 状态: processing, 进度: 60%
-[PROGRESS] 状态: processing, 进度: 90%
-[SUCCESS] 任务完成!
-文件名: 人工智能发展历史.pptx
-下载链接: https://xxx.feishu.cn/file/xxx
-链接有效期至: 2024-02-13 12:00:00
+[INFO] Querying task status: task_abc123xyz
+[PROGRESS] Status: processing, Progress: 30%
+[PROGRESS] Status: processing, Progress: 60%
+[PROGRESS] Status: processing, Progress: 90%
+[SUCCESS] Task completed!
+File name: AI_History.pptx
+Download link: https://xxx.feishu.cn/file/xxx
+Link expires at: 2024-02-13 12:00:00
 ```
 
-### 任务失败
+### Task Failed
 
 ```
-[ERROR] 任务失败!
-错误信息: Generation timeout
+[ERROR] Task failed!
+Error message: Generation timeout
 ```
 
-### 下载完成
+### Download Complete
 
 ```
-[INFO] 下载文件中...
-[SUCCESS] 文件已保存: ./output/人工智能发展历史.pptx
+[INFO] Downloading file...
+[SUCCESS] File saved: ./output/AI_History.pptx
 ```
 
 ## Error Handling
 
-| 错误信息 | 说明 | 解决方案 |
-|----------|------|----------|
-| invalid API key | API Key 无效 | 检查 API Key 是否正确 |
-| operation not allowed | 无权限执行该操作 | 联系管理员获取权限 |
-| prompt is required | 缺少提示词 | 添加 --prompt 参数 |
-| task not found | 任务不存在 | 检查 task_id 是否正确 |
-| Generation timeout | 生成超时 | 重新创建任务 |
+| Error Message | Description | Solution |
+|---------------|-------------|----------|
+| invalid API key | Invalid API Key | Check if API Key is correct |
+| operation not allowed | No permission for this operation | Contact admin for permissions |
+| prompt is required | Missing prompt | Add --prompt parameter |
+| task not found | Task does not exist | Check if task_id is correct |
+| Generation timeout | Generation timed out | Recreate the task |
 
 ## Notes
 
-- 单个任务最长执行时间为 10 分钟
-- 下载链接有效期为 24 小时
-- 附件文件单个不超过 10MB (Base64 编码后)
-- 轮询间隔为 3 秒
+- Maximum execution time per task is 10 minutes
+- Download link is valid for 24 hours
+- Single attachment file should not exceed 10MB (after Base64 encoding)
+- Polling interval is 3 seconds
 
 ## Files
 
 ```
 anygen/
-├── skill.md              # 本文档
+├── skill.md              # This document
 └── scripts/
-    └── anygen.py         # 主脚本
+    └── anygen.py         # Main script
 ```

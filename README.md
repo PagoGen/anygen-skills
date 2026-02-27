@@ -1,80 +1,70 @@
-# AnyGen Skills
+# AnyGen Content Generator
 
-[AnyGen](https://www.anygen.io) AI 内容生成技能，用于 Claude Code。
+[中文](./README_zh.md)
 
-## 功能
+A Claude Code skill for generating AI content using AnyGen OpenAPI.
 
-支持多种 AI 内容生成模式：
+## Features
 
-| 模式 | 说明 |
-|------|------|
-| `slide` | PPT/演示文稿生成 |
-| `doc` | 文档生成 |
-| `chat` | 通用 AI 对话 |
-| `storybook` | 故事板生成 |
-| `data_analysis` | 数据分析 |
-| `website` | 网站开发 |
+| Operation | Description | File Download |
+|-----------|-------------|---------------|
+| `slide` | Generate PPT/Slides | ✅ Yes (.pptx) |
+| `doc` | Generate Documents | ✅ Yes (.docx) |
+| `chat` | General AI conversation | ❌ Online only |
+| `storybook` | Create storyboards | ❌ Online only |
+| `data_analysis` | Data analysis | ❌ Online only |
+| `website` | Website development | ❌ Online only |
 
-## 安装
+## Quick Start
 
-### 作为 Claude Code Skill 使用
+1. **Get API Key** from [AnyGen](https://www.anygen.io) → Setting → Integration
 
-```bash
-# 克隆到 Claude Code skills 目录
-git clone https://github.com/PagoGen/anygen-skills.git ~/.claude/my_skills/anygen
-```
+2. **Configure API Key**:
+   ```bash
+   python3 ~/.claude/my_skills/anygen/scripts/anygen.py config set api_key "sk-xxx"
+   ```
 
-### 依赖
+3. **Generate content**:
+   ```bash
+   # Generate PPT
+   python3 ~/.claude/my_skills/anygen/scripts/anygen.py run \
+     --operation slide \
+     --prompt "A presentation about AI applications" \
+     --output ./output/
 
-```bash
-pip3 install requests
-```
+   # Generate Document
+   python3 ~/.claude/my_skills/anygen/scripts/anygen.py run \
+     --operation doc \
+     --prompt "A report on 2024 tech trends" \
+     --output ./output/
+   ```
 
-## 配置
+## Commands
 
-获取 API Key 后保存到配置文件：
+| Command | Description |
+|---------|-------------|
+| `create` | Create a generation task |
+| `poll` | Poll task status until completion |
+| `download` | Download generated file |
+| `run` | Full workflow: create → poll → download |
+| `config` | Manage API Key configuration |
 
-```bash
-python3 scripts/anygen.py config set api_key "sk-xxx"
-```
+## Parameters
 
-API Key 获取方式：访问 [AnyGen](https://www.anygen.io) → Setting → 集成 → 生成 API Key
+| Parameter | Short | Description |
+|-----------|-------|-------------|
+| --api-key | -k | API Key (optional if configured) |
+| --operation | -o | Operation type: slide, doc, chat, etc. |
+| --prompt | -p | Content description |
+| --language | -l | Language: zh-CN or en-US |
+| --slide-count | -c | Number of PPT pages |
+| --style | -s | Style preference |
+| --file | | Attachment file (can be used multiple times) |
+| --output | | Output directory for downloaded files |
 
-## 使用示例
+## More Details
 
-### 生成 PPT
-
-```bash
-python3 scripts/anygen.py run \
-  --operation slide \
-  --prompt "关于人工智能发展历史的演示文稿" \
-  --style "商务正式" \
-  --output ./output/
-```
-
-### 生成文档
-
-```bash
-python3 scripts/anygen.py run \
-  --operation doc \
-  --prompt "项目技术方案文档" \
-  --output ./output/
-```
-
-### 附加参考文件
-
-```bash
-python3 scripts/anygen.py run \
-  --operation slide \
-  --prompt "公司季度汇报" \
-  --file ./data.xlsx \
-  --file ./logo.png \
-  --output ./output/
-```
-
-## 详细文档
-
-查看 [skill.md](./skill.md) 获取完整使用说明。
+See [skill.md](./skill.md) for complete documentation.
 
 ## License
 
