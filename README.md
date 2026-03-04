@@ -57,10 +57,10 @@ Requires `fin_*` data tools (built into OpenClaw). No additional configuration n
 
 ```
 # Task Manager
-"做一个产品Roadmap ppt"
-"画一个用户旅程的白板图"
-"写一份AI行业深度调研报告"
-"把这份数据整理成表格"
+"Make a product roadmap PPT"
+"Draw a user journey whiteboard"
+"Write an AI industry deep research report"
+"Organize this data into a table"
 "Make a quarterly review slide deck"
 
 # Finance Report  
