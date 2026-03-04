@@ -29,7 +29,7 @@ except ImportError:
 API_BASE = "https://www.anygen.io"
 POLL_INTERVAL = 3  # seconds
 MAX_POLL_TIME = 900  # 15 minutes
-MEDIA_WORKSPACE = Path.home() / ".openclaw" / "workspace"
+OPENCLAW_WORKSPACE = Path.home() / ".openclaw" / "workspace"
 CONFIG_DIR = Path.home() / ".config" / "anygen"
 CONFIG_FILE = CONFIG_DIR / "config.json"
 ENV_API_KEY = "ANYGEN_API_KEY"
@@ -262,7 +262,10 @@ def poll_task(api_key, task_id, max_time=MAX_POLL_TIME, extra_headers=None, outp
 
     # When media mode is on, default output to workspace
     if media and not output_dir:
-        output_dir = str(MEDIA_WORKSPACE)
+        if OPENCLAW_WORKSPACE.is_dir():
+            output_dir = str(OPENCLAW_WORKSPACE)
+        else:
+            output_dir = "."
 
     start_time = time.time()
     last_progress = -1
@@ -351,7 +354,10 @@ def download_file(api_key, task_id, output_dir, extra_headers=None, media=False)
     """Download the generated file. Returns local file path or False."""
     # When media mode is on, default output to workspace
     if media and not output_dir:
-        output_dir = str(MEDIA_WORKSPACE)
+        if OPENCLAW_WORKSPACE.is_dir():
+            output_dir = str(OPENCLAW_WORKSPACE)
+        else:
+            output_dir = "."
 
     # First query task to get file URL
     task = query_task(api_key, task_id, extra_headers)
