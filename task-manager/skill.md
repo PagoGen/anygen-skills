@@ -252,6 +252,21 @@ The `run` command will automatically:
 
 **For `smart_draw`**: The final output is the **rendered PNG image**, not the downloaded .xml/.json source file. Always return the PNG path to the user.
 
+### IM File Delivery (MEDIA: Protocol)
+
+When running in an **IM context** (e.g., Feishu/Lark bot), use the `--media` flag to enable file delivery via the OpenClaw `MEDIA:` protocol:
+
+1. Detect IM context → add `--media` to `poll`/`run`/`download` commands
+2. Files are automatically saved to `~/.openclaw/workspace/`
+3. On completion, the script outputs `MEDIA:/absolute/path/to/file`
+4. Send this `MEDIA:` line as a **separate short message** so the framework can deliver the file to the user
+
+```bash
+# Example: IM mode with media delivery
+python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py run \
+  --operation slide --prompt "..." --media
+```
+
 ### Task Created Successfully
 
 ```
@@ -281,6 +296,44 @@ Task ID: task_abc123xyz
 Error message: Generation timeout
 ```
 
+## Non-blocking Mode (for IM bots / background tasks)
+
+Instead of the blocking `run` command, use `create` + `status` + `download` for non-blocking execution:
+
+### Step 1: Create task (returns immediately)
+
+```bash
+python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py create \
+  --operation slide --prompt "..."
+# → Task ID: task_abc123xyz
+```
+
+### Step 2: Check status periodically (non-blocking, single query)
+
+```bash
+python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
+  --task-id task_abc123xyz
+# → [STATUS] task_id=task_abc123xyz status=processing progress=60
+
+# JSON output mode:
+python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
+  --task-id task_abc123xyz --json
+# → {"task_id": "task_abc123xyz", "status": "processing", "progress": 60}
+```
+
+### Step 3: When completed, download file
+
+```bash
+python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py download \
+  --task-id task_abc123xyz --output ./ --media
+```
+
+### Progress notification pattern
+
+- Call `status` every 5–10 seconds
+- Forward progress changes to the user
+- When `status=completed`, download and deliver the file
+
 ## Error Handling
 
 | Error Message | Description | Solution |
@@ -302,7 +355,7 @@ Error message: Generation timeout
 
 ## Notes
 
-- Maximum execution time per task is 10 minutes
+- Maximum execution time per task is 15 minutes (customizable via `--max-time`)
 - Download link is valid for 24 hours
 - Single attachment file should not exceed 10MB (after Base64 encoding)
 - Polling interval is 3 seconds
