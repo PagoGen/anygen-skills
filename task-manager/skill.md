@@ -123,9 +123,9 @@ Save the returned `task_id` for subsequent steps.
 | --style | -s | Style preference | No |
 | --smart-draw-format | -d | excalidraw / drawio (default: drawio) | No |
 
-### Step 3: Check progress — call `status` periodically
+### Step 3: Check progress — call `status` periodically and report to user
 
-`status` is a **non-blocking single query** — call it, get the result, return immediately. Repeat every 5-10 seconds and forward progress changes to the user.
+`status` is a **non-blocking single query** — call it, get the result, return immediately.
 
 ```bash
 python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
@@ -139,6 +139,16 @@ python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
 ```
 
 When `status=completed`, proceed to Step 4. When `status=failed`, report the error to user.
+
+**Progress reporting rules — you MUST follow:**
+
+1. Call `status` every **5-10 seconds**
+2. **Every time progress changes**, report it to the user immediately, e.g.:
+   - "AnyGen is generating your slides... (30%)"
+   - "Almost there, laying out and styling... (90%)"
+3. If progress **stays the same for 30+ seconds**, reassure the user:
+   - "AnyGen is working on deep content generation, this is normal for complex tasks — please wait."
+4. **Do NOT** assume the task is stuck or errored just because progress hasn't changed. AnyGen performs deep generation (content research, layout design, style rendering) which can take minutes at the same progress percentage. Only treat `status=failed` as an error.
 
 ### Step 4: Download file
 
