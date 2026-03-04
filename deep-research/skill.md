@@ -20,7 +20,9 @@ Generate long-form research reports covering market overview, trends, competitor
 
 - Python3 and `requests`: `pip3 install requests`
 - AnyGen API Key (`sk-xxx`) — [Get one](https://www.anygen.io/home) → Setting → Integration
-- Configure once: `python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py config set api_key "sk-xxx"`
+- Configure once: `python3 scripts/anygen.py config set api_key "sk-xxx"`
+
+> All `scripts/` paths below are relative to this skill's installation directory.
 
 ## Invocation Flow
 
@@ -37,7 +39,7 @@ Generate long-form research reports covering market overview, trends, competitor
 ### Step 2: Create task
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py create \
+python3 scripts/anygen.py create \
   --operation chat \
   --prompt "Write a deep research report on the global AI chip market: market size, key players (NVIDIA, AMD, Intel, custom silicon), trends, and 3-year outlook"
 # → Task ID: task_abc123xyz
@@ -54,7 +56,7 @@ python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py create \
 ### Step 3: Check progress
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
+python3 scripts/anygen.py status \
   --task-id task_abc123xyz
 # → [STATUS] task_id=task_abc123xyz status=processing progress=60
 ```
@@ -75,7 +77,7 @@ python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
 **No file download** for deep research. Return the **Task URL** for online viewing.
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
+python3 scripts/anygen.py status \
   --task-id task_abc123xyz --json
 # → {"task_id": "task_abc123xyz", "status": "completed", "progress": 100, "task_url": "https://www.anygen.io/task/task_abc123xyz"}
 ```

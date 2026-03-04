@@ -21,7 +21,9 @@ Generate architecture diagrams, flowcharts, and system diagrams from natural lan
 - Python3 and `requests`: `pip3 install requests`
 - Node.js v18+ (for PNG rendering, auto-installed on first run)
 - AnyGen API Key (`sk-xxx`) — [Get one](https://www.anygen.io/home) → Setting → Integration
-- Configure once: `python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py config set api_key "sk-xxx"`
+- Configure once: `python3 scripts/anygen.py config set api_key "sk-xxx"`
+
+> All `scripts/` paths below are relative to this skill's installation directory.
 
 ## Invocation Flow
 
@@ -42,7 +44,7 @@ Generate architecture diagrams, flowcharts, and system diagrams from natural lan
 ### Step 2: Create task
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py create \
+python3 scripts/anygen.py create \
   --operation smart_draw \
   --prompt "A microservice architecture diagram with API gateway, auth service, and database" \
   --smart-draw-format drawio
@@ -62,7 +64,7 @@ python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py create \
 ### Step 3: Check progress
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
+python3 scripts/anygen.py status \
   --task-id task_abc123xyz
 # → [STATUS] task_id=task_abc123xyz status=processing progress=60
 ```
@@ -81,7 +83,7 @@ python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
 ### Step 4: Download file
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py download \
+python3 scripts/anygen.py download \
   --task-id task_abc123xyz --output ./output/
 ```
 
@@ -91,10 +93,10 @@ The downloaded file (.xml/.json) is a diagram source, **NOT an image**. You **MU
 
 ```bash
 # For DrawIO:
-bash ~/.openclaw/skills/anygen/task-manager/scripts/render-diagram.sh drawio ./output/diagram.xml ./output/diagram.png
+bash scripts/render-diagram.sh drawio ./output/diagram.xml ./output/diagram.png
 
 # For Excalidraw:
-bash ~/.openclaw/skills/anygen/task-manager/scripts/render-diagram.sh excalidraw ./output/diagram.json ./output/diagram.png
+bash scripts/render-diagram.sh excalidraw ./output/diagram.json ./output/diagram.png
 ```
 
 | Format | --smart-draw-format | Export File | Render Command |

@@ -20,7 +20,9 @@ Generate structured documents from natural language prompts. Supports DOCX and P
 
 - Python3 and `requests`: `pip3 install requests`
 - AnyGen API Key (`sk-xxx`) — [Get one](https://www.anygen.io/home) → Setting → Integration
-- Configure once: `python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py config set api_key "sk-xxx"`
+- Configure once: `python3 scripts/anygen.py config set api_key "sk-xxx"`
+
+> All `scripts/` paths below are relative to this skill's installation directory.
 
 ## Invocation Flow
 
@@ -41,7 +43,7 @@ Generate structured documents from natural language prompts. Supports DOCX and P
 ### Step 2: Create task
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py create \
+python3 scripts/anygen.py create \
   --operation doc \
   --prompt "A technical design document for a real-time notification system" \
   --doc-format docx
@@ -61,7 +63,7 @@ python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py create \
 ### Step 3: Check progress
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
+python3 scripts/anygen.py status \
   --task-id task_abc123xyz
 # → [STATUS] task_id=task_abc123xyz status=processing progress=60
 ```
@@ -80,7 +82,7 @@ python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
 ### Step 4: Download file
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py download \
+python3 scripts/anygen.py download \
   --task-id task_abc123xyz --output ./output/
 ```
 

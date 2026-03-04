@@ -20,7 +20,9 @@ Analyze CSV data with AnyGen: generate clean tables, summaries, charts, and insi
 
 - Python3 and `requests`: `pip3 install requests`
 - AnyGen API Key (`sk-xxx`) — [Get one](https://www.anygen.io/home) → Setting → Integration
-- Configure once: `python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py config set api_key "sk-xxx"`
+- Configure once: `python3 scripts/anygen.py config set api_key "sk-xxx"`
+
+> All `scripts/` paths below are relative to this skill's installation directory.
 
 ## Invocation Flow
 
@@ -38,7 +40,7 @@ Analyze CSV data with AnyGen: generate clean tables, summaries, charts, and insi
 ### Step 2: Create task
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py create \
+python3 scripts/anygen.py create \
   --operation data_analysis \
   --prompt "Analyze the sales trends and create a monthly summary with charts" \
   --file ./data/sales_2024.csv
@@ -57,7 +59,7 @@ python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py create \
 ### Step 3: Check progress
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
+python3 scripts/anygen.py status \
   --task-id task_abc123xyz
 # → [STATUS] task_id=task_abc123xyz status=processing progress=60
 ```
@@ -79,7 +81,7 @@ python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
 
 ```bash
 # Use --json to get structured output with task_url:
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
+python3 scripts/anygen.py status \
   --task-id task_abc123xyz --json
 # → {"task_id": "task_abc123xyz", "status": "completed", "progress": 100, "task_url": "https://www.anygen.io/task/task_abc123xyz"}
 ```
