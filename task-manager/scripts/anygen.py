@@ -314,9 +314,9 @@ def poll_task(api_key, task_id, max_time=MAX_POLL_TIME, extra_headers=None, outp
                     if media:
                         print(f"MEDIA:{local_path}")
 
-            # Output image_url for slide/doc preview
-            if output.get("image_url"):
-                print(f"[RESULT] Image URL: {output['image_url']}")
+            # Output thumbnail_url for slide/doc preview
+            if output.get("thumbnail_url"):
+                print(f"[RESULT] Thumbnail URL: {output['thumbnail_url']}")
 
             print(f"[RESULT] Task URL: {task_url}")
             return task
@@ -386,8 +386,8 @@ def download_file(api_key, task_id, output_dir, extra_headers=None, media=False)
         print(f"[RESULT] Local file: {local_path}")
         if media:
             print(f"MEDIA:{local_path}")
-        if output.get("image_url"):
-            print(f"[RESULT] Image URL: {output['image_url']}")
+        if output.get("thumbnail_url"):
+            print(f"[RESULT] Thumbnail URL: {output['thumbnail_url']}")
         print(f"[RESULT] Task URL: {task_url}")
         return local_path
     return False
@@ -414,8 +414,8 @@ def query_task_status(api_key, task_id, extra_headers=None, as_json=False):
                 result["file_url"] = output["file_url"]
             if output.get("file_name"):
                 result["file_name"] = output["file_name"]
-            if output.get("image_url"):
-                result["image_url"] = output["image_url"]
+            if output.get("thumbnail_url"):
+                result["thumbnail_url"] = output["thumbnail_url"]
             result["task_url"] = output.get("task_url", f"{API_BASE}/task/{task_id}")
         elif status == "failed":
             result["error"] = task.get("error", "Unknown error")
@@ -424,8 +424,8 @@ def query_task_status(api_key, task_id, extra_headers=None, as_json=False):
         parts = [f"[STATUS] task_id={task_id} status={status} progress={progress}"]
         if status == "completed" and output.get("file_name"):
             parts.append(f"file_name={output['file_name']}")
-        if status == "completed" and output.get("image_url"):
-            parts.append(f"image_url={output['image_url']}")
+        if status == "completed" and output.get("thumbnail_url"):
+            parts.append(f"thumbnail_url={output['thumbnail_url']}")
         if status == "completed" and output.get("file_url"):
             parts.append(f"file_url={output['file_url']}")
         if status == "completed":

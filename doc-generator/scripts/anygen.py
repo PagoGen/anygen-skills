@@ -301,9 +301,9 @@ def poll_task(api_key, task_id, max_time=MAX_POLL_TIME, extra_headers=None, outp
                 if local_path:
                     print(f"[RESULT] Local file: {local_path}")
 
-            # Output image_url for doc preview
-            if output.get("image_url"):
-                print(f"[RESULT] Image URL: {output['image_url']}")
+            # Output thumbnail_url for doc preview
+            if output.get("thumbnail_url"):
+                print(f"[RESULT] Thumbnail URL: {output['thumbnail_url']}")
 
             print(f"[RESULT] Task URL: {task_url}")
             return task
@@ -364,8 +364,8 @@ def download_file(api_key, task_id, output_dir, extra_headers=None):
     local_path = _download_to_local(file_url, file_name, output_dir)
     if local_path:
         print(f"[RESULT] Local file: {local_path}")
-        if output.get("image_url"):
-            print(f"[RESULT] Image URL: {output['image_url']}")
+        if output.get("thumbnail_url"):
+            print(f"[RESULT] Thumbnail URL: {output['thumbnail_url']}")
         print(f"[RESULT] Task URL: {task_url}")
         return local_path
     return False
