@@ -24,7 +24,7 @@ git clone https://github.com/AnyGenIO/anygen-skills.git ~/.claude/skills/anygen
 
 ```bash
 # AnyGen API Key（Task Manager 需要）
-python3 task-manager/scripts/anygen.py config set api_key "sk-xxx"
+python3 anygen-suite/scripts/anygen.py config set api_key "sk-xxx"
 
 # 或环境变量
 export ANYGEN_API_KEY="sk-xxx"

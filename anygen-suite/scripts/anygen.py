@@ -7,7 +7,6 @@ Usage:
     python3 anygen.py poll --api-key sk-xxx --task-id task_xxx
     python3 anygen.py status --api-key sk-xxx --task-id task_xxx [--json]
     python3 anygen.py download --api-key sk-xxx --task-id task_xxx --output ./
-    python3 anygen.py run --api-key sk-xxx --operation slide --prompt "..." --output ./
 """
 
 import argparse
@@ -432,22 +431,6 @@ def query_task_status(api_key, task_id, extra_headers=None, as_json=False):
     return task
 
 
-def run_full_workflow(api_key, operation, prompt, output_dir, extra_headers=None, style=None,
-                      media=False, max_time=MAX_POLL_TIME, **kwargs):
-    """Run the full workflow: create -> poll -> auto download."""
-    # Create task
-    task_id = create_task(api_key, operation, prompt, extra_headers=extra_headers, style=style, **kwargs)
-    if not task_id:
-        return False
-
-    # Poll for completion (auto-downloads if output_dir is provided)
-    task = poll_task(api_key, task_id, max_time=max_time, extra_headers=extra_headers,
-                     output_dir=output_dir or ".", media=media)
-    if not task or task.get("status") != "completed":
-        return False
-
-    return True
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -464,8 +447,6 @@ Examples:
   # Download generated file
   python3 anygen.py download -k sk-xxx --task-id task_xxx --output ./
 
-  # Run full workflow
-  python3 anygen.py run -k sk-xxx -o slide -p "AI trends presentation" --output ./
         """
     )
 
@@ -512,24 +493,6 @@ Examples:
     download_parser.add_argument("--task-id", required=True, help="Task ID")
     download_parser.add_argument("--output", required=True, help="Output directory")
     download_parser.add_argument("--media", action="store_true", help="Enable MEDIA: protocol output for IM file delivery")
-
-    # Run command (full workflow)
-    run_parser = subparsers.add_parser("run", help="Run full workflow: create -> poll -> download")
-    add_common_args(run_parser)
-    run_parser.add_argument("--operation", "-o", required=True,
-                           choices=["chat", "slide", "doc", "storybook", "data_analysis", "website", "smart_draw"],
-                           help="Operation type: chat, slide, doc, storybook, data_analysis, website, smart_draw")
-    run_parser.add_argument("--prompt", "-p", required=True, help="Content prompt")
-    run_parser.add_argument("--language", "-l", help="Language (zh-CN, en-US)")
-    run_parser.add_argument("--slide-count", "-c", type=int, help="Number of slides")
-    run_parser.add_argument("--template", "-t", help="Slide template")
-    run_parser.add_argument("--ratio", "-r", choices=["16:9", "4:3"], help="Slide ratio")
-    run_parser.add_argument("--export-format", "-f", help="Export format (slide: pptx/image, doc: docx/image, smart_draw: drawio/excalidraw)")
-    run_parser.add_argument("--file", action="append", dest="files", help="Attachment file path")
-    run_parser.add_argument("--style", "-s", help="Style preference (e.g., 'business formal', 'minimalist modern', 'tech')")
-    run_parser.add_argument("--output", help="Output directory (optional)")
-    run_parser.add_argument("--max-time", type=int, default=MAX_POLL_TIME, help=f"Max poll time in seconds (default: {MAX_POLL_TIME})")
-    run_parser.add_argument("--media", action="store_true", help="Enable MEDIA: protocol output for IM file delivery")
 
     # Config command
     config_parser = subparsers.add_parser("config", help="Manage configuration")
@@ -656,24 +619,6 @@ Examples:
         success = download_file(api_key, args.task_id, args.output, extra_headers=extra_headers, media=args.media)
         sys.exit(0 if success else 1)
 
-    elif args.command == "run":
-        success = run_full_workflow(
-            api_key=api_key,
-            operation=args.operation,
-            prompt=args.prompt,
-            output_dir=args.output,
-            extra_headers=extra_headers,
-            language=args.language,
-            slide_count=args.slide_count,
-            template=args.template,
-            ratio=args.ratio,
-            export_format=args.export_format,
-            files=args.files,
-            style=args.style,
-            media=args.media,
-            max_time=args.max_time
-        )
-        sys.exit(0 if success else 1)
 
 
 if __name__ == "__main__":

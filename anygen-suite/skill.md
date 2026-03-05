@@ -53,7 +53,7 @@ If you don't have an API Key:
 Save the API Key to a config file to avoid entering it every time:
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py config set api_key "sk-xxx"
+python3 ~/.openclaw/skills/anygen/anygen-suite/scripts/anygen.py config set api_key "sk-xxx"
 ```
 
 Config file location: `~/.config/anygen/config.json`
@@ -98,7 +98,7 @@ Before execution, **MUST ask the user**:
 ### Step 2: Create task
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py create \
+python3 ~/.openclaw/skills/anygen/anygen-suite/scripts/anygen.py create \
   --operation slide \
   --prompt "A presentation about the history of artificial intelligence" \
   --style "business formal"
@@ -127,12 +127,12 @@ Save the returned `task_id` for subsequent steps.
 `status` is a **non-blocking single query** — call it, get the result, return immediately.
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
+python3 ~/.openclaw/skills/anygen/anygen-suite/scripts/anygen.py status \
   --task-id task_abc123xyz
 # → [STATUS] task_id=task_abc123xyz status=processing progress=60
 
 # JSON output mode:
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py status \
+python3 ~/.openclaw/skills/anygen/anygen-suite/scripts/anygen.py status \
   --task-id task_abc123xyz --json
 # → {"task_id": "task_abc123xyz", "status": "processing", "progress": 60}
 ```
@@ -153,7 +153,7 @@ When `status=completed`, proceed to Step 4. When `status=failed`, report the err
 ### Step 4: Download file
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py download \
+python3 ~/.openclaw/skills/anygen/anygen-suite/scripts/anygen.py download \
   --task-id task_abc123xyz --output ./output/
 ```
 
@@ -172,9 +172,9 @@ python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py download \
 The downloaded file (.xml/.json) is a diagram source, NOT an image. You **MUST** render it to PNG:
 
 ```bash
-bash ~/.openclaw/skills/anygen/task-manager/scripts/render-diagram.sh drawio ./output/diagram.xml ./output/diagram.png
+bash ~/.openclaw/skills/anygen/anygen-suite/scripts/render-diagram.sh drawio ./output/diagram.xml ./output/diagram.png
 # Or for excalidraw:
-bash ~/.openclaw/skills/anygen/task-manager/scripts/render-diagram.sh excalidraw ./output/diagram.json ./output/diagram.png
+bash ~/.openclaw/skills/anygen/anygen-suite/scripts/render-diagram.sh excalidraw ./output/diagram.json ./output/diagram.png
 ```
 
 Dependencies are auto-installed on first run. Only Node.js (v18+) is required.
@@ -190,30 +190,13 @@ Dependencies are auto-installed on first run. Only Node.js (v18+) is required.
 
 ---
 
-## Alternative: Blocking `run` command
-
-> For simple scripts or CLI usage where blocking is acceptable. **Not recommended for AI agents** — prefer the non-blocking flow above.
-
-The `run` command combines create + poll + download in one blocking call:
-
-```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py run \
-  --operation slide \
-  --prompt "A presentation about the history of artificial intelligence" \
-  --style "business formal" \
-  --output ./output/ \
-  --max-time 900
-```
-
-This blocks until the task completes (up to `--max-time` seconds). Accepts the same parameters as `create`, plus `--output`, `--max-time`, and `--media`.
-
 ## Advanced: IM File Delivery (MEDIA: Protocol)
 
-When running in an **IM context** (e.g., Feishu/Lark bot with OpenClaw), add `--media` to `run`/`poll`/`download`:
+When running in an **IM context** (e.g., Feishu/Lark bot with OpenClaw), add `--media` to `poll`/`download`:
 
 ```bash
-python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py run \
-  --operation slide --prompt "..." --media
+python3 ~/.openclaw/skills/anygen/anygen-suite/scripts/anygen.py poll \
+  --task-id task_abc123xyz --media
 ```
 
 Behavior:
@@ -253,7 +236,7 @@ Behavior:
 ## Files
 
 ```
-task-manager/
+anygen-suite/
 ├── skill.md                   # This document
 └── scripts/
     ├── anygen.py              # Main script (AnyGen API client)

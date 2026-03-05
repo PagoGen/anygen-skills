@@ -22,22 +22,24 @@
 
 2. **配置 API Key**：
    ```bash
-   python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py config set api_key "sk-xxx"
+   python3 ~/.openclaw/skills/anygen/anygen-suite/scripts/anygen.py config set api_key "sk-xxx"
    ```
 
-3. **生成内容**：
+3. **生成内容**（create → status → download）：
    ```bash
-   # 生成 PPT
-   python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py run \
+   # 创建幻灯片任务
+   python3 ~/.openclaw/skills/anygen/anygen-suite/scripts/anygen.py create \
      --operation slide \
-     --prompt "关于人工智能应用的演示文稿" \
-     --output ./output/
+     --prompt "关于人工智能应用的演示文稿"
+   # → Task ID: task_abc123xyz
 
-   # 生成文档
-   python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py run \
-     --operation doc \
-     --prompt "2024年科技趋势报告" \
-     --output ./output/
+   # 查询状态
+   python3 ~/.openclaw/skills/anygen/anygen-suite/scripts/anygen.py status \
+     --task-id task_abc123xyz
+
+   # 完成后下载
+   python3 ~/.openclaw/skills/anygen/anygen-suite/scripts/anygen.py download \
+     --task-id task_abc123xyz --output ./output/
    ```
 
 ## 命令说明
@@ -47,7 +49,6 @@
 | `create` | 创建生成任务 |
 | `poll` | 轮询任务状态直到完成 |
 | `download` | 下载生成的文件 |
-| `run` | 完整流程：创建 → 轮询 → 下载 |
 | `config` | 管理 API Key 配置 |
 
 ## 参数说明

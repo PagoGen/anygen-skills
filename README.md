@@ -42,7 +42,7 @@ git clone https://github.com/AnyGenIO/anygen-skills.git ~/.claude/skills/anygen
 
 ```bash
 # Option 1: Config file
-python3 task-manager/scripts/anygen.py config set api_key "sk-xxx"
+python3 anygen-suite/scripts/anygen.py config set api_key "sk-xxx"
 
 # Option 2: Environment variable
 export ANYGEN_API_KEY="sk-xxx"
@@ -76,7 +76,7 @@ Requires `fin_*` data tools (built into OpenClaw). No additional configuration n
 ```
 anygen/
 ├── SKILL.md                    # Skill router
-├── task-manager/               # AnyGen content generation
+├── anygen-suite/               # AnyGen content generation
 │   ├── skill.md
 │   └── scripts/
 │       ├── anygen.py

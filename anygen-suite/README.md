@@ -22,22 +22,24 @@ A Claude Code skill for generating AI content using AnyGen OpenAPI.
 
 2. **Configure API Key**:
    ```bash
-   python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py config set api_key "sk-xxx"
+   python3 ~/.openclaw/skills/anygen/anygen-suite/scripts/anygen.py config set api_key "sk-xxx"
    ```
 
-3. **Generate content**:
+3. **Generate content** (create → status → download):
    ```bash
-   # Generate PPT
-   python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py run \
+   # Create a slide task
+   python3 ~/.openclaw/skills/anygen/anygen-suite/scripts/anygen.py create \
      --operation slide \
-     --prompt "A presentation about AI applications" \
-     --output ./output/
+     --prompt "A presentation about AI applications"
+   # → Task ID: task_abc123xyz
 
-   # Generate Document
-   python3 ~/.openclaw/skills/anygen/task-manager/scripts/anygen.py run \
-     --operation doc \
-     --prompt "A report on 2024 tech trends" \
-     --output ./output/
+   # Check status
+   python3 ~/.openclaw/skills/anygen/anygen-suite/scripts/anygen.py status \
+     --task-id task_abc123xyz
+
+   # Download when completed
+   python3 ~/.openclaw/skills/anygen/anygen-suite/scripts/anygen.py download \
+     --task-id task_abc123xyz --output ./output/
    ```
 
 ## Commands
@@ -47,7 +49,6 @@ A Claude Code skill for generating AI content using AnyGen OpenAPI.
 | `create` | Create a generation task |
 | `poll` | Poll task status until completion |
 | `download` | Download generated file |
-| `run` | Full workflow: create → poll → download |
 | `config` | Manage API Key configuration |
 
 ## Parameters
