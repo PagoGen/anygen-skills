@@ -1,7 +1,7 @@
 ---
 name: anygen-slide
 homepage: https://www.anygen.io
-description: "Generate professional slide presentations with AnyGen AI. Uses dialogue mode to understand audience, purpose, and content before generating. Background-polls progress and auto-delivers the downloaded PPTX file without blocking the conversation."
+description: "Generate professional slide presentations with AnyGen AI. Uses dialogue mode to understand audience, purpose, and content before generating. Background-monitors progress and delivers a preview with online editing link when ready."
 requires:
   - sessions_spawn
 env:
@@ -19,6 +19,8 @@ permissions:
 
 # AI Slide Generator - AnyGen
 
+> **You MUST strictly follow every instruction in this document.** Do not skip, reorder, or improvise any step.
+
 Create professional slide presentations using AnyGen OpenAPI.
 
 ## When to Use
@@ -29,20 +31,18 @@ Create professional slide presentations using AnyGen OpenAPI.
 ## Security & Permissions
 
 **What this skill does:**
-- Sends task prompts and parameters to the AnyGen API at `www.anygen.io`
-- Uploads user-provided reference files to `www.anygen.io` after obtaining user consent
-- Downloads generated PPTX files to local disk or `~/.openclaw/workspace/`
-- Spawns a background poll process (up to 20 min) to monitor progress and auto-download results
+- Sends task prompts and parameters to `www.anygen.io`
+- Uploads user-provided reference files to `www.anygen.io` after obtaining consent
+- Downloads generated PPTX files to `~/.openclaw/workspace/`
+- Spawns a background process (up to 20 min) to monitor progress and auto-download
 - Reads/writes API key config at `~/.config/anygen/config.json`
 
 **What this skill does NOT do:**
-- Does not upload files without informing the user and obtaining consent
-- Does not send your API key to any endpoint other than `www.anygen.io`
-- Does not modify system configuration beyond `~/.config/anygen/config.json`
+- Upload files without informing the user and obtaining consent
+- Send your API key to any endpoint other than `www.anygen.io`
+- Modify system configuration beyond `~/.config/anygen/config.json`
 
-**Bundled scripts:** `scripts/anygen.py` (Python — uses `requests`)
-
-Review the bundled scripts before first use to verify behavior.
+**Bundled scripts:** `scripts/anygen.py` (Python — uses `requests`). Review before first use.
 
 ## Prerequisites
 
@@ -52,67 +52,60 @@ Review the bundled scripts before first use to verify behavior.
 
 > All `scripts/` paths below are relative to this skill's installation directory.
 
-## CRITICAL: Background Poll — NEVER Block the Conversation
+## CRITICAL: NEVER Block the Conversation
 
-After creating a task, you MUST start a **background** poll process to auto-download the result, then continue the conversation normally. NEVER call `poll` in the foreground — it blocks for 3-20 minutes.
+After creating a task, you MUST start background monitoring via `sessions_spawn`, then continue normally. NEVER call `poll` in the foreground — it blocks for up to 20 minutes.
 
-Rules:
-1. Use `create` to start the task → get `task_id` and `task_url`.
-2. Give the user the `task_url` for immediate online preview.
-3. Launch `poll` as a **background process** to auto-download the file when ready (see Phase 4).
-4. Continue the conversation normally — do NOT wait.
-5. After the conversation naturally ends or the user asks about the result, check if the background poll has completed and deliver the file.
+1. `create` → get `task_id` and `task_url`.
+2. Tell user: (a) generation started, (b) the online link, (c) ~10–15 min, free to do other things.
+3. Launch background monitor via `sessions_spawn` (Phase 4). Do NOT announce this to the user.
+4. Continue the conversation — do NOT wait.
+5. Background monitor sends preview image; its completion output is user-friendly text you relay. No duplication.
+6. Only send the PPT file if the user explicitly requests it.
 
 ## Communication Style
 
-When interacting with the user, communicate naturally and professionally:
+**NEVER expose internal implementation details** to the user. Forbidden terms:
+- Technical identifiers: `task_id`, `file_token`, `conversation.json`, `task_xxx`, `tk_xxx`
+- API/system terms: `API`, `OpenAPI`, `prepare`, `create`, `poll`, `status`, `query`
+- Infrastructure terms: `sub-agent`, `subagent`, `background process`, `spawn`, `sessions_spawn`
+- Script/code references: `anygen.py`, `scripts/`, command-line syntax, JSON output
 
-1. You may refer to AnyGen as the service powering the slide generation when relevant.
-2. Present questions and suggestions in a natural, conversational tone — avoid exposing raw API responses or technical implementation details.
-3. Summarize `prepare` responses in your own words rather than echoing them verbatim.
-4. Stick to the questions `prepare` returned — do not add unrelated questions.
+Use natural language instead:
+- "Your file has been uploaded" (NOT "file_token=tk_xxx received")
+- "I'm generating your slides now" (NOT "Task task_xxx created")
+- "You can view your slides here: [URL]" (NOT "Task URL: ...")
+- "I'll let you know when they're ready" (NOT "Spawning a sub-agent to poll")
 
-### Examples
+Additional rules:
+- You may mention AnyGen as the service when relevant.
+- Summarize `prepare` responses naturally — do not echo verbatim.
+- Stick to the questions `prepare` returned — do not add unrelated ones.
+- Ask questions in your own voice, as if they are your own questions. Do NOT use a relaying tone like "AnyGen wants to know…" or "The system is asking…".
 
-Less ideal (overly technical):
-- "The prepare API returned the following JSON response with status=collecting..."
-- "The system's internal tool asks: who is your target audience?"
-
-Better (natural and professional):
-- "Who is the target audience for this presentation?"
-- "Based on what you've shared, here is the plan for your presentation: [summary]. Should I go ahead, or would you like to adjust anything?"
-
-## Slide Workflow (MUST Follow)
-
-For slides, you MUST go through all 4 phases. A good presentation needs audience, purpose, scene type, desired outcome, and content details. Users rarely provide all of these upfront.
+## Slide Workflow (MUST Follow All 4 Phases)
 
 ### Phase 1: Understand Requirements
 
-If the user provides files, you MUST handle them yourself before calling `prepare`:
+If the user provides files, handle them before calling `prepare`:
 
-1. **Read the file content yourself** using your own file reading capabilities. Extract key information (topic, data, structure) that is relevant to creating the presentation.
-2. **Check if the file was already uploaded** in this conversation. If you already have a `file_token` for the same file, reuse it — do NOT upload again.
-3. **Inform the user and get consent** before uploading. Tell them the file will be uploaded to AnyGen's server for processing. For example: "I'll upload your file to AnyGen so it can be used as reference material for the slides. This may take a moment..."
-4. **Upload the file** to get a `file_token` for later use in task creation.
-5. **Include the extracted content** as part of your `--message` text when calling `prepare`, so that the requirement analysis has full context.
-
-The `prepare` API does NOT read files internally. You are responsible for providing all relevant file content as text in the conversation.
+1. **Read the file** yourself. Extract key information relevant to the presentation.
+2. **Reuse existing `file_token`** if the same file was already uploaded in this conversation.
+3. **Get consent** before uploading: "I'll upload your file to AnyGen for reference. This may take a moment..."
+4. **Upload** to get a `file_token`.
+5. **Include extracted content** in `--message` when calling `prepare` (the API does NOT read files internally).
 
 ```bash
-# Step 1: Tell the user you are uploading, then upload the file
 python3 scripts/anygen.py upload --file ./report.pdf
 # Output: File Token: tk_abc123
 
-# Step 2: Call prepare with extracted file content included in the message
 python3 scripts/anygen.py prepare \
-  --message "I need a slide deck for our Q4 board review. Here is the key content from the uploaded report: [your extracted summary/content here]" \
+  --message "I need a slide deck for our Q4 board review. Key content: [extracted summary]" \
   --file-token tk_abc123 \
   --save ./conversation.json
 ```
 
-The `--file-token` parameter in `prepare` attaches the file reference to the conversation, but it does NOT extract or read the file content. You must include the relevant content as text in `--message`.
-
-Present the questions from `reply` naturally (see Communication Style above). Then continue the conversation with the user's answers:
+Present questions from `reply` naturally. Continue with user's answers:
 
 ```bash
 python3 scripts/anygen.py prepare \
@@ -124,93 +117,101 @@ python3 scripts/anygen.py prepare \
 Repeat until `status="ready"` with `suggested_task_params`.
 
 Special cases:
-- If the user provides very complete requirements and `status="ready"` on the first call, proceed directly to Phase 2.
-- If the user says "just create it, don't ask questions", skip prepare and go to Phase 3 with `create` directly.
-- For template/style reference files (e.g., "use this as a template"), do NOT extract content. Just upload and pass the `file_token`.
+- `status="ready"` on first call → proceed to Phase 2.
+- User says "just create it" → skip to Phase 3 with `create` directly.
+- Template/style reference files → upload only, do NOT extract content.
 
 ### Phase 2: Confirm with User (MANDATORY)
 
-When `status="ready"`, `prepare` returns `suggested_task_params` containing a detailed prompt. You MUST present this to the user for confirmation before creating the task.
+When `status="ready"`, summarize the suggested plan (audience, structure, style) and ask for confirmation. NEVER auto-create without explicit approval.
 
-How to present:
-1. Summarize the key aspects of the suggested plan in natural language (audience, structure, content highlights, style).
-2. Ask the user to confirm or modify. For example: "Here is what I plan to create: [summary]. Should I go ahead, or would you like to change anything?"
-3. NEVER auto-create the task without the user's explicit approval.
-
-When the user requests adjustments:
-1. Call `prepare` again with the user's modification as a new message, loading the existing conversation history:
-
-```bash
-python3 scripts/anygen.py prepare \
-  --input ./conversation.json \
-  --message "<the user's modification request>" \
-  --save ./conversation.json
-```
-
-2. `prepare` will return an updated suggestion that incorporates the user's changes.
-3. Present the updated suggestion to the user again for confirmation (repeat from step 1 above).
-4. Repeat this confirm-adjust loop until the user explicitly approves. Do NOT skip confirmation after an adjustment.
+If the user requests adjustments, call `prepare` again with the modification, re-present, and repeat until approved.
 
 ### Phase 3: Create Task
-
-Once the user confirms:
 
 ```bash
 python3 scripts/anygen.py create \
   --operation slide \
-  --prompt "<prompt from suggested_task_params, with any user modifications>" \
+  --prompt "<prompt from suggested_task_params>" \
   --file-token tk_abc123
 # Output: Task ID: task_xxx, Task URL: https://...
 ```
 
-**Immediately tell the user:**
-1. Slides are being generated (takes a few minutes).
-2. Give them the **Task URL** so they can preview progress online right now.
-3. Tell them you will deliver the downloaded file once it's ready.
+**Immediately tell the user (natural language, NO internal terms):**
+1. Slides are being generated.
+2. Online preview/edit link: "You can follow the progress here: [URL]".
+3. Takes about **10–15 minutes** — free to do other things, you'll notify when ready.
 
 ### Phase 4: Monitor and Deliver Result
 
-> **Requires `sessions_spawn`.** If sub-agent is not available, skip to the **Fallback** section below.
+> **Requires `sessions_spawn`.** If unavailable, skip to **Fallback** below.
 
-#### With Sub-Agent (preferred)
+#### Background Monitoring (preferred)
 
-Spawn a sub-agent to monitor the task in the background. Use `sessions_spawn` with the following instructions.
-
-**Information to pass to the sub-agent** (it has NO context from this conversation):
-- `task_id` — from Phase 3 output
-- `task_url` — the Task URL returned by `create`
-- `script_path` — absolute path to `scripts/anygen.py`
-
-**Sub-agent instructions** (pass this as the task prompt):
+Spawn via `sessions_spawn` with the following prompt (it has NO conversation context):
 
 ```
-You are a background monitor for an AnyGen slide generation task.
+You are a background monitor for a slide generation task.
+You MUST strictly follow every instruction below. Do not skip, reorder, or improvise any step.
 
 Task ID: {task_id}
 Task URL: {task_url}
 Script: {script_path}
+User Language: {user_language}
+
+CRITICAL RULES:
+- You MUST reply in {user_language}.
+- You send ONLY the preview image to the user. Do NOT send any text messages.
+- Your final output will be relayed by the main assistant as the text notification.
+  Write it as a clean, user-friendly message.
+- Do NOT say anything beyond what is specified below. No greetings, no extra commentary.
+- NEVER include technical terms like "task_id", "file_token", "poll", "sub-agent",
+  "API", "script", "workspace", "downloaded to", file paths, or status labels
+  in your final output.
 
 Your job:
-1. Poll the task status every 60 seconds using:
-   python3 {script_path} status --task-id {task_id} --json
-2. When status="completed", download the file to ~/.openclaw/workspace/:
-   python3 {script_path} download --task-id {task_id} --output ~/.openclaw/workspace/ --media
-3. The script will output a MEDIA: line (with non-ASCII filenames automatically handled). Deliver it to the user:
-   a. Send a SHORT message containing ONLY the MEDIA: line exactly as output by the script.
-      This message MUST be sent as a separate message by itself — do NOT combine it with other text.
-      The MEDIA: protocol will deliver the actual file to the user in their IM client.
-   b. Then send a second message to the user with:
-      - The Task URL ({task_url}) for online viewing/editing
-      - If there is a [RESULT] Thumbnail URL: line, download the thumbnail image to a local file and show it to the user as a preview
-4. If status="failed", tell the user the generation failed and provide the Task URL for reference.
-5. Timeout after 20 minutes — if still not completed, tell the user the task is taking longer than expected and provide the Task URL for them to check manually.
+1. Run: python3 {script_path} poll --task-id {task_id}
+   (Do NOT pass --output — the PPTX will only be downloaded when the user requests it.)
+
+2. On success:
+   a. Download thumbnail:
+      python3 {script_path} thumbnail --task-id {task_id} --output /tmp/
+   b. Send ONLY the preview image to the user (no text). Choose the correct method:
+      - Feishu/Lark: Upload image via lark-mcp image API, then send image message.
+      - Other platforms: Send via message tool with filePath.
+      The user must see the image inline — not a path or link.
+   c. Final output must be EXACTLY like:
+      "Your slides are ready! If you'd like me to send you the PPT file, just let me know."
+
+3. On failure, final output:
+   "Unfortunately the slide generation didn't complete successfully.
+    You can check the details here: {task_url}"
+
+4. On timeout (20 min), final output:
+   "The slides are taking a bit longer than expected.
+    You can check the progress here: {task_url}"
 ```
 
-Then continue the conversation normally. Do NOT wait for the sub-agent.
+Do NOT wait for the background monitor. Do NOT tell the user you launched it.
 
-#### Fallback (no sub-agent)
+**Handling the completion event.** The background monitor sends the preview image directly but no text. Its completion output is a user-friendly message. Simply relay it — do NOT add extra information or technical details. The completion event may arrive with a system-generated prefix (e.g., "✅ Subagent main finished"). Strip any such prefix before relaying — only send the background monitor's actual output text to the user.
 
-If `sessions_spawn` is not available, tell the user something like: "I've started the generation for you. Unfortunately I'm not able to track the progress automatically in this environment — please check the link above in a few minutes to view and download your slides."
+#### When the User Requests the PPT File
+
+Download, then send via the appropriate method for your IM environment:
+
+```bash
+python3 scripts/anygen.py download --task-id {task_id} --output ~/.openclaw/workspace/
+```
+
+- **Feishu/Lark**: Upload file via lark-mcp file API, then send as file message.
+- **Other platforms**: Send via message tool with filePath.
+
+Follow up naturally: "Here's your PPT file! You can also edit online at [Task URL]."
+
+#### Fallback (no background monitoring)
+
+Tell the user: "I've started generating your slides. It usually takes about 10–15 minutes. You can check the progress here: [Task URL]. Let me know when you'd like me to check if it's ready!"
 
 ## Command Reference
 
@@ -229,7 +230,7 @@ python3 scripts/anygen.py create --operation slide --prompt "..." [options]
 | --slide-count | -c | Number of slides |
 | --template | -t | Slide template |
 | --ratio | -r | Slide ratio (16:9 / 4:3) |
-| --export-format | -f | Export format: `pptx` (default) / `image` |
+| --export-format | -f | Export format: `pptx` (default) / `image` / `thumbnail` |
 | --style | -s | Style preference |
 
 ### upload
@@ -238,7 +239,7 @@ python3 scripts/anygen.py create --operation slide --prompt "..." [options]
 python3 scripts/anygen.py upload --file ./document.pdf
 ```
 
-Returns a `file_token`. Max file size: 50MB. Tokens are persistent and reusable.
+Returns a `file_token`. Max 50MB. Tokens are persistent and reusable.
 
 ### prepare
 
@@ -257,43 +258,55 @@ python3 scripts/anygen.py prepare --message "..." [--file-token tk_xxx] [--input
 
 ### poll
 
-Blocks until task completes, auto-downloads the file, and prints `[RESULT]` lines.
+Blocks until completion. Downloads file only if `--output` is specified.
 
 ```bash
-python3 scripts/anygen.py poll --task-id task_xxx --output ./output/
+python3 scripts/anygen.py poll --task-id task_xxx                    # status only
+python3 scripts/anygen.py poll --task-id task_xxx --output ./output/ # with download
 ```
 
 | Parameter | Description |
 |-----------|-------------|
 | --task-id | Task ID from `create` |
-| --output | Output directory for auto-download (default: current directory) |
+| --output | Output directory (omit to skip download) |
 
-### download (manual, if needed)
+### thumbnail
+
+Downloads only the thumbnail preview image.
+
+```bash
+python3 scripts/anygen.py thumbnail --task-id task_xxx --output /tmp/
+```
+
+| Parameter | Description |
+|-----------|-------------|
+| --task-id | Task ID from `create` |
+| --output | Output directory |
+
+### download
+
+Downloads the generated file (e.g., PPTX).
 
 ```bash
 python3 scripts/anygen.py download --task-id task_xxx --output ./output/
 ```
 
+| Parameter | Description |
+|-----------|-------------|
+| --task-id | Task ID from `create` |
+| --output | Output directory |
+
 ## Error Handling
 
 | Error | Solution |
 |-------|----------|
-| invalid API key | Check API Key format (sk-xxx) |
+| invalid API key | Check format (sk-xxx) |
 | operation not allowed | Contact admin for permissions |
 | prompt is required | Add --prompt parameter |
-| file size exceeds 50MB limit | Reduce file size |
+| file size exceeds 50MB | Reduce file size |
 
 ## Notes
 
 - Max task execution time: 20 minutes
 - Download link valid for 24 hours
 - Poll interval: 3 seconds
-
-## Files
-
-```
-slide-generator/
-├── skill.md              # This document
-└── scripts/
-    └── anygen.py         # CLI client
-```
