@@ -150,16 +150,5 @@ if "$TSX_BIN" "$SCRIPT_DIR/diagram-to-image.ts" "$@"; then
   exit 0
 else
   echo -e "${RED}✗ Render failed${NC}" >&2
-  echo "" >&2
-  echo -e "${YELLOW}⚠ You can export manually:${NC}" >&2
-  if [[ "$TYPE" == "excalidraw" ]]; then
-    echo -e "${BLUE}  1. Open https://excalidraw.com${NC}" >&2
-    echo -e "${BLUE}  2. Import file: $INPUT_FILE${NC}" >&2
-    echo -e "${BLUE}  3. Menu -> Export image -> PNG${NC}" >&2
-  else
-    echo -e "${BLUE}  1. Open https://app.diagrams.net${NC}" >&2
-    echo -e "${BLUE}  2. Import file: $INPUT_FILE${NC}" >&2
-    echo -e "${BLUE}  3. File -> Export as -> PNG${NC}" >&2
-  fi
   exit 1
 fi
