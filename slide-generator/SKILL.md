@@ -1,5 +1,6 @@
 ---
 name: anygen-slide
+homepage: https://www.anygen.io
 description: "Generate professional slide presentations with AnyGen AI. Uses dialogue mode to understand audience, purpose, and content before generating. Background-polls progress and auto-delivers the downloaded PPTX file without blocking the conversation."
 requires:
   - sessions_spawn
@@ -25,15 +26,23 @@ Create professional slide presentations using AnyGen OpenAPI.
 - User needs to create PPT/Slides/Presentations
 - User has files to upload as reference material for slide generation
 
-## Privacy & Security
+## Security & Permissions
 
-This skill performs the following sensitive operations — users should be aware of these behaviors:
+**What this skill does:**
+- Sends task prompts and parameters to the AnyGen API at `www.anygen.io`
+- Uploads user-provided reference files to `www.anygen.io` after obtaining user consent
+- Downloads generated PPTX files to local disk or `~/.openclaw/workspace/`
+- Spawns a background poll process (up to 20 min) to monitor progress and auto-download results
+- Reads/writes API key config at `~/.config/anygen/config.json`
 
-- **Credentials**: Requires an AnyGen API Key (`ANYGEN_API_KEY` env var or `~/.config/anygen/config.json`). The config file is read/written by the bundled `scripts/anygen.py` script.
-- **Network access**: All API calls go to `https://www.anygen.io`. The bundled Python script (`scripts/anygen.py`) performs HTTP requests using the `requests` library.
-- **File uploads**: When the user provides reference files, the agent will upload them to AnyGen's server after obtaining user consent. Users are informed before any file is transmitted.
-- **Background processes**: After task creation, a background poll process runs for up to 20 minutes to monitor progress and auto-download results. This extends network activity beyond the immediate conversation.
-- **Local filesystem writes**: Downloaded files are saved to the output directory or `~/.openclaw/workspace/`.
+**What this skill does NOT do:**
+- Does not upload files without informing the user and obtaining consent
+- Does not send your API key to any endpoint other than `www.anygen.io`
+- Does not modify system configuration beyond `~/.config/anygen/config.json`
+
+**Bundled scripts:** `scripts/anygen.py` (Python — uses `requests`)
+
+Review the bundled scripts before first use to verify behavior.
 
 ## Prerequisites
 

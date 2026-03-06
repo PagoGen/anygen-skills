@@ -1,5 +1,6 @@
 ---
 name: anygen-doc
+homepage: https://www.anygen.io
 description: "Generate structured documents with AnyGen: specs, proposals, and summaries. Export in DOCX or PDF format with clean formatting and headings. Triggers: write document, generate doc, create spec, write proposal, technical document, requirements document."
 env:
   - ANYGEN_API_KEY
@@ -27,13 +28,23 @@ Generate structured documents from natural language prompts. Supports DOCX and P
 | Summary | "create an executive summary of the Q4 results" |
 
 
-## Privacy & Security
+## Security & Permissions
 
-This skill performs the following sensitive operations:
+**What this skill does:**
+- Sends task prompts and parameters to the AnyGen API at `www.anygen.io`
+- Uploads user-provided reference files to `www.anygen.io` when `--file` is specified
+- Downloads generated documents (DOCX) to local disk
+- Reads/writes API key config at `~/.config/anygen/config.json`
 
-- **Credentials**: Requires an AnyGen API Key (`ANYGEN_API_KEY` env var or `~/.config/anygen/config.json`). The config file is read/written by the bundled `scripts/anygen.py` script.
-- **Network access**: All API calls go to `https://www.anygen.io`. The bundled Python script (`scripts/anygen.py`) performs HTTP requests using the `requests` library.
-- **Local filesystem writes**: Downloaded files are saved to the specified output directory.
+**What this skill does NOT do:**
+- Does not upload files unless the user explicitly provides them via `--file`
+- Does not send your API key to any endpoint other than `www.anygen.io`
+- Does not modify system configuration beyond `~/.config/anygen/config.json`
+- Does not run background processes or install additional software
+
+**Bundled scripts:** `scripts/anygen.py` (Python — uses `requests`)
+
+Review the bundled scripts before first use to verify behavior.
 
 ## Prerequisites
 
