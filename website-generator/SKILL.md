@@ -4,6 +4,8 @@ homepage: https://www.anygen.io
 description: "Build a landing page or simple website with AnyGen AI. Uses dialogue mode to understand purpose, audience, and content before generating. Triggers: build website, landing page, create webpage, web page, simple site."
 env:
   - ANYGEN_API_KEY
+requires:
+  - sessions_spawn
 permissions:
   network:
     - "https://www.anygen.io"
@@ -16,6 +18,8 @@ permissions:
 
 # AnyGen AI Website Generator
 
+> **You MUST strictly follow every instruction in this document.** Do not skip, reorder, or improvise any step.
+
 Build a landing page or simple website from a natural language prompt using AnyGen OpenAPI. Output: online task URL for viewing the generated website.
 
 ## When to Use
@@ -26,45 +30,54 @@ Build a landing page or simple website from a natural language prompt using AnyG
 ## Security & Permissions
 
 **What this skill does:**
-- Sends task prompts and parameters to the AnyGen API at `www.anygen.io`
-- Uploads user-provided reference files to `www.anygen.io` when `--file` is specified
+- Sends task prompts and parameters to `www.anygen.io`
+- Uploads user-provided reference files to `www.anygen.io` after obtaining consent
 - Reads/writes API key config at `~/.config/anygen/config.json`
 
 **What this skill does NOT do:**
-- Does not upload files unless the user explicitly provides them via `--file`
-- Does not send your API key to any endpoint other than `www.anygen.io`
-- Does not modify system configuration beyond `~/.config/anygen/config.json`
-- Does not run background processes or install additional software
+- Upload files without informing the user and obtaining consent
+- Send your API key to any endpoint other than `www.anygen.io`
+- Modify system configuration beyond `~/.config/anygen/config.json`
 
-**Bundled scripts:** `scripts/anygen.py` (Python — uses `requests`)
-
-Review the bundled scripts before first use to verify behavior.
+**Bundled scripts:** `scripts/anygen.py` (Python — uses `requests`). Review before first use.
 
 ## Prerequisites
 
 - Python3 and `requests`: `pip3 install requests`
-- AnyGen API Key (`sk-xxx`) — [Get one](https://www.anygen.io/home) → Setting → Integration
+- AnyGen API Key (`sk-xxx`) — [Get one](https://www.anygen.io/home?auto_create_openclaw_key=1) → Setting → Integration
 - Configure once: `python3 scripts/anygen.py config set api_key "sk-xxx"`
 
 > All `scripts/` paths below are relative to this skill's installation directory.
 
+## CRITICAL: NEVER Block the Conversation
+
+After creating a task, you MUST start background monitoring via `sessions_spawn`, then continue normally. NEVER call `poll` in the foreground — it blocks for up to 20 minutes.
+
+1. `create` → get `task_id` and `task_url`.
+2. Tell user: (a) generation started, (b) the online link, (c) ~10–15 min, free to do other things.
+3. Launch background monitor via `sessions_spawn` (Phase 4). Do NOT announce this to the user.
+4. Continue the conversation — do NOT wait.
+5. Background monitor notifies when done; relay its output. No duplication.
+
 ## Communication Style
 
-When interacting with the user, communicate naturally and professionally:
+**NEVER expose internal implementation details** to the user. Forbidden terms:
+- Technical identifiers: `task_id`, `file_token`, `conversation.json`, `task_xxx`, `tk_xxx`
+- API/system terms: `API`, `OpenAPI`, `prepare`, `create`, `poll`, `status`, `query`
+- Infrastructure terms: `sub-agent`, `subagent`, `background process`, `spawn`, `sessions_spawn`
+- Script/code references: `anygen.py`, `scripts/`, command-line syntax, JSON output
 
-1. You may refer to AnyGen as the service powering the website generation when relevant.
-2. Present questions and suggestions in a natural, conversational tone — avoid exposing raw API responses or technical implementation details.
-3. Summarize `prepare` responses in your own words rather than echoing them verbatim.
-4. Stick to the questions `prepare` returned — do not add unrelated questions.
+Use natural language instead:
+- "Your file has been uploaded" (NOT "file_token=tk_xxx received")
+- "I'm building your website now" (NOT "Task task_xxx created")
+- "You can view your website here: [URL]" (NOT "Task URL: ...")
+- "I'll let you know when it's ready" (NOT "Spawning a sub-agent to poll")
 
-### Examples
-
-Less ideal (overly technical):
-- "The prepare API returned the following JSON response with status=collecting..."
-
-Better (natural and professional):
-- "What is the primary purpose of this website, and who is the target audience?"
-- "Based on what you've shared, here is the website plan: [summary]. Should I go ahead, or would you like to adjust anything?"
+Additional rules:
+- You may mention AnyGen as the service when relevant.
+- Summarize `prepare` responses naturally — do not echo verbatim.
+- Stick to the questions `prepare` returned — do not add unrelated ones.
+- Ask questions in your own voice, as if they are your own questions. Do NOT use a relaying tone like "AnyGen wants to know…" or "The system is asking…".
 
 ## Website Workflow (MUST Follow)
 
@@ -144,20 +157,59 @@ python3 scripts/anygen.py create \
 # Output: Task ID: task_xxx, Task URL: https://...
 ```
 
-**Immediately tell the user:**
-1. Website is being generated (takes a few minutes).
-2. Give them the **Task URL** so they can check progress online.
+**Immediately tell the user (natural language, NO internal terms):**
+1. Website is being generated.
+2. Online link: "You can follow the progress here: [URL]".
+3. Takes about **10–15 minutes** — free to do other things, you'll notify when ready.
 
-### Phase 4: Return Results
+### Phase 4: Monitor and Notify
 
-**No file download** for website. When the task completes, return the **Task URL** for online viewing.
+> **Requires `sessions_spawn`.** If unavailable, skip to **Fallback** below.
 
-```bash
-python3 scripts/anygen.py poll --task-id task_xxx
+#### Background Monitoring (preferred)
+
+Spawn via `sessions_spawn` with the following prompt (it has NO conversation context):
+
+```
+You are a background monitor for a website generation task.
+You MUST strictly follow every instruction below. Do not skip, reorder, or improvise any step.
+
+Task ID: {task_id}
+Task URL: {task_url}
+Script: {script_path}
+User Language: {user_language}
+
+CRITICAL RULES:
+- You MUST reply in {user_language}.
+- Your final output will be relayed by the main assistant as the text notification.
+  Write it as a clean, user-friendly message.
+- Do NOT say anything beyond what is specified below. No greetings, no extra commentary.
+- NEVER include technical terms like "task_id", "poll", "sub-agent", "API", "script",
+  file paths, or status labels in your final output.
+
+Your job:
+1. Run: python3 {script_path} poll --task-id {task_id}
+   (No --output needed — results are viewed online.)
+
+2. On success, final output:
+   "Your website is ready! You can view it here: {task_url}"
+
+3. On failure, final output:
+   "Unfortunately the website generation didn't complete successfully.
+    You can check the details here: {task_url}"
+
+4. On timeout (20 min), final output:
+   "The website is taking a bit longer than expected.
+    You can check the progress here: {task_url}"
 ```
 
-**Tell the user:**
-- **Task URL** — for viewing and interacting with the generated website
+Do NOT wait for the background monitor. Do NOT tell the user you launched it.
+
+**Handling the completion event.** Simply relay the background monitor's output — do NOT add extra information or technical details. Strip any system-generated prefix (e.g., "✅ Subagent main finished") before relaying.
+
+#### Fallback (no background monitoring)
+
+Tell the user: "I've started building your website. It usually takes about 10–15 minutes. You can check the progress here: [Task URL]. Let me know when you'd like me to check if it's ready!"
 
 ## Command Reference
 

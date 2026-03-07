@@ -106,6 +106,33 @@ function findPnpmPackage(projectRoot: string, name: string): string[] {
 }
 
 // ---------------------------------------------------------------------------
+// Input Validation
+// ---------------------------------------------------------------------------
+
+function validateHexColor(color: string): string {
+  // Only allow valid hex colors (3, 4, 6, or 8 hex digits with # prefix)
+  if (/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(color)) {
+    return color;
+  }
+  console.warn(`Invalid background color "${color}", falling back to #ffffff`);
+  return '#ffffff';
+}
+
+function validateScale(scale: number): number {
+  const n = Math.round(scale);
+  if (n >= 1 && n <= 10) return n;
+  console.warn(`Invalid scale ${scale}, falling back to 2`);
+  return 2;
+}
+
+function validatePadding(padding: number): number {
+  const n = Math.round(padding);
+  if (n >= 0 && n <= 200) return n;
+  console.warn(`Invalid padding ${padding}, falling back to 20`);
+  return 20;
+}
+
+// ---------------------------------------------------------------------------
 // HTML Templates
 //
 // All browser-side logic lives INSIDE the HTML templates as plain JS strings.
@@ -300,9 +327,9 @@ async function renderDrawio(
 export async function renderDiagram(opts: RenderOptions): Promise<RenderResult> {
   const pw = await getPlaywright();
   const browser = await launchBrowser(pw);
-  const scale = opts.scale ?? 2;
-  const background = opts.background ?? '#ffffff';
-  const padding = opts.padding ?? 20;
+  const scale = validateScale(opts.scale ?? 2);
+  const background = validateHexColor(opts.background ?? '#ffffff');
+  const padding = validatePadding(opts.padding ?? 20);
 
   try {
     const page = await browser.newPage();
@@ -338,9 +365,9 @@ export async function renderDiagrams(
     const results: RenderResult[] = [];
     for (const opts of items) {
       const page = await browser.newPage();
-      const scale = opts.scale ?? 2;
-      const background = opts.background ?? '#ffffff';
-      const padding = opts.padding ?? 20;
+      const scale = validateScale(opts.scale ?? 2);
+      const background = validateHexColor(opts.background ?? '#ffffff');
+      const padding = validatePadding(opts.padding ?? 20);
 
       let data: Buffer;
       switch (opts.type) {
@@ -440,9 +467,9 @@ async function main() {
     process.exit(1);
   }
 
-  const scale = flags.scale ? Number(flags.scale) : 2;
-  const background = flags.background ?? '#ffffff';
-  const padding = flags.padding ? Number(flags.padding) : 20;
+  const scale = validateScale(flags.scale ? Number(flags.scale) : 2);
+  const background = validateHexColor(flags.background ?? '#ffffff');
+  const padding = validatePadding(flags.padding ? Number(flags.padding) : 20);
 
   console.log(`Rendering ${type} diagram → PNG (scale=${scale})...`);
 
